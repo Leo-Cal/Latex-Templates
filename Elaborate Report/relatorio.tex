@@ -1,0 +1,393 @@
+\documentclass[12pt,titlepage]{article}
+
+\usepackage[brazil]{babel}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc} %use UTF8 encoding
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{minted}
+\usepackage{multicol}
+\usepackage{subcaption}
+\usepackage{titlepic}
+\usepackage{fancyhdr} %%Fancy headings
+
+
+
+\fancypagestyle{front}{
+
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \fancyhead[L]{\raisebox{-0.5\height}{\includegraphics[scale=0.3]{logo.png}}
+	}
+\fancyhead[R]{
+\raisebox{-0.5\height}{\includegraphics[scale=0.15]{poli.jpeg}}
+}
+}
+
+
+\colorlet{codegray}{gray!20}
+
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+
+\lstset{ % General setup for the package
+	language=Prolog,
+	basicstyle=\small\sffamily,
+	numbers=left,
+ 	numberstyle=\tiny,
+	frame=tb,
+	tabsize=4,
+	columns=fixed,
+	showstringspaces=false,
+	showtabs=false,
+	keepspaces,
+	commentstyle=\color{red},
+	keywordstyle=\color{blue}
+}
+
+\lstdefinestyle{myPrologstyle}
+{
+    language=Prolog,
+    basicstyle = \ttfamily\color{blue},
+    moredelim = [s][\color{black}]{(}{)},
+    literate =
+        {:-}{{\textcolor{black}{:-}}}2
+        {,}{{\textcolor{black}{,}}}1
+        {.}{{\textcolor{black}{.}}}1
+}
+
+
+\title{Modelagem e simulação de sistemas de planejamento automático usando inteligência artificial}
+\date{20/01/2018}
+\author{Leonardo Calasans}
+%\titlepic{\includegraphics{logo.png}}
+
+
+%\graphicspath{/Desktop/Poli/Iniciação Científica/Relatorio/Images}
+\begin{document}
+
+\input{titlepage}
+
+\pagenumbering{gobble}
+%\maketitle
+\newpage
+\doublespacing
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+
+\begin{abstract}
+		\paragraph{}
+		A área de inteligência artificial é de grande importância para o desenvolvimento científico e tecnológico. Assim, se faz imprescindível obter um conhecimento mais aprofundado e prático nessa área ainda na graduação.
+		\paragraph{}
+		Para este trabalho, foram  estudados conceitos de planejamento de inteligencia artificial, tais como tipos de planejadores, algoritmos de busca, heurísticas, e métodos formais de descrição de problemas. Esses conhecimentos foram então aplicados no desenvolvimento de um planejador capaz de resolver um problema canônico da inteligencia artificial.
+		\paragraph{}
+		Não bastando apenas obter um plano e validá-lo em ferramentas e planejadores já existentes, buscou-se também uma maneira de simular esse plano, seja em ambiente virtual ou real, utilizando um framework usado mundialmente para controle e construção de robôs.
+
+\end{abstract}
+\newpage
+
+\section{Introdução}
+
+	\paragraph{}
+	Sistemas de planejamento de inteligência artificial é assunto de muitos trabalhos científicos e base para diversas aplicações tecnológicas de inteligencia artificial. Dessa maneira, aprender conceitos envolvidos na construção desses planejadores é de grande interesse para formação acadêmica.
+	\paragraph{}
+	Alem disso, o custo de aplicar os planos obtidos às vezes é muito alto, sendo interessante possuir um ambiente virtual para simulação e validação desses planos. Neste trabalho, usa-se ROS para simulação e propõe-se o uso do Gazebo como ambiente virtual de simulação. 
+
+
+
+\section{Modelagem de sistema de planejamento}
+\subsection{Solução do problema dos blocos}
+\subsubsection{O problema}
+
+\paragraph{}
+
+O "mundo dos blocos" consiste em um conjunto de uma superfície e uma certa quantidade de blocos que devem ser empilhados de determinada maneira por um agente manipulador com algumas restrições : a) só é possível manipular um bloco por vez e b) não é possível manipular um bloco se há outro em cima dele.\cite{intart}
+
+\paragraph{}
+
+Dependendo da disposição inicial e final desejada, o problema torna-se não-trivial devvido à chamada "Anomalida de Sussman" \cite{modernapp}. Uma dessas disposições é mostrada na figura 1.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=\linewidth]{sussman.png}
+  \caption{Exemplo de disposição que passa pela Anomalia de Sussman}
+  \label{fig:figura 1}
+\end{figure}
+
+\paragraph{}
+
+Nesses casos, planejadores que simplemente resolvem os sub-objetivos isoladamente não são capazes de resolver o problema, pois ao resolver um dos sub-objetivos, um dos demais, completado anteriormente, é desfeito.
+\paragraph{}
+
+No exemplo da figura 1, o sub-objetivo de ter A em cima de B é desfeito quando se vai cumprir o sub-objetivo de ter B em cima de C.
+
+\subsubsection{Solução em Prolog}
+
+Para resolver o problema da Anomalia de Sussman, foi desenvolvido um programa, em lingaugem Prolog \cite{prolog} e utilizado um sistema de descrição formal de problemas de inteligência arficial denominado STRIPS \cite{intart}.
+\paragraph{}
+
+	Uma instância STRIPS é uma quádrupla (P,O,I,G) em que:
+
+  \begin{itemize}
+    \item 		“P” representa o conjunto de condições inerentes ao problema analisado
+    \item 		“O” representa o conjunto de ações possíveis nesse problema. Cada ação é representada pelas suas pré-condições e pós-condições, ou seja, condições necessárias para que a ação possa ser realizada e as condições que a ação tornam verdadeiras.
+    \item 		“I” representa o estado inicial do problema
+    \item     “G” representa o estado final do problema
+
+  \end{itemize}
+	\paragraph{}
+
+  Parte de cada um dos itens que compõe a instância STRIPS desse problema são mostradas nas linhas de código abaixo.
+
+\singlespacing
+\begin{small}
+
+\begin{minted}[bgcolor = codegray]{Prolog}
+block(a).
+block(b).
+block(c).
+clear(hand).
+clear(table).
+
+\end{minted}
+
+\captionof{lstlisting}{Conjunto de condições inerentes ao problema analisado ("P")}
+
+\bigskip
+
+\begin{minted}[bgcolor = codegray]{Prolog}
+putdown(X,A) :-
+      %precond
+	block(X),
+	block(A),
+	held(X),
+	clear(A),
+	A \== X,
+      %effects
+        assert(clear(hand)),
+	assert(on(X,A)),
+	assert(clear(X)),
+	retract(clear(A)),
+	retract(held(X)),
+	assert(move(putdown(X,A))).
+\end{minted}
+\captionof{lstlisting}{Definição de uma das ações do conjunto "O"}
+
+\bigskip
+
+\begin{minted}[bgcolor = codegray]{Prolog}
+%Initializer
+
+init([]) :-
+	true,
+	init_clear([a,b,c]).
+
+
+init([H|L]) :-
+  initialize(H),
+	init(L).
+
+initialize(on(X,Y)) :-
+	assert(on(X,Y)).
+
+
+init_clear([]) :-
+	true.
+
+init_clear([H|L]) :-
+	(initialize_clear(H); true),
+	init_clear(L).
+
+initialize_clear(X) :-
+	not(on(_,X)),
+	assert(clear(X)).
+\end{minted}
+\captionof{lstlisting}{Inicialização do problema e construção do conjunto "I"}
+
+\bigskip
+
+\begin{minted}[bgcolor = codegray]{Prolog}
+%Solving
+
+solve([H|R],[G|L]) :-
+  init([H|R]),
+  solve_all([G|L], [G|L]).
+
+solve_all([G|L],Glist) :-
+	G,
+	solve_all(L,Glist).
+
+solve_all([G|_], Glist) :-
+	do(G),
+	solve_all(Glist,Glist).
+
+solve_all([],_).
+
+
+%Doing
+
+do(G) :-
+	G.
+
+do(on(A,B)):-
+	force_putdown(A,B).
+do(on(A,table)):-
+	force_put_on_table(A).
+\end{minted}
+\captionof{lstlisting}{Resolução do problema com "G" dado pelo usuário}
+
+
+\doublespacing
+\end{small}
+
+\bigskip
+
+
+ Assim, o programa recebe como entrada duas listas, representando os estados inicial e final, e retorna a lista de movimentos necessários :
+
+ \singlespacing
+ \begin{small}
+
+
+ 	\begin{minted}[bgcolor = codegray]{Prolog}
+
+?- solve([on(a,table),on(b,table),on(c,a)],[on(a,b),on(b,c),on(c,table)]).
+ true .
+
+ ?- listing(move).
+ :- dynamic move/1.
+
+ move(pickup(c)).
+ move(put_on_table(c)).
+ move(pickup(a)).
+ move(putdown(a, b)).
+ move(pickup(a)).
+ move(put_on_table(a)).
+ move(pickup(b)).
+ move(putdown(b, c)).
+ move(pickup(a)).
+ move(putdown(a, b)).
+
+ true.
+
+ 	\end{minted}
+	\captionof{lstlisting}{Resolução do exemplo da figura 1}
+
+
+\doublespacing
+\end{small}
+
+\bigskip
+
+\subsubsection{Solução usando o itSIMPLE 4.0}
+
+  Após a resolução do problema do mundo dos blocos em Prolog, houve o aprendizado sobre Redes de Petri,UML \cite{uml} e sobre o funcionamento da ferramenta itSIMPLE \cite{itsimple2005} \cite{itsimple3.0} \cite{itsimple2.0} \cite{itsimple4.0}, que possibilita modelar problemas de maneira mais eficiente , obter planos de solução e Redes de Petri representando-os.
+	\paragraph{}
+
+	A figura 2 mostra a modelagem do problema da figura 1 no itSIMPLE e o plano obtido utilizando o planejador Metric-FF.
+
+\newpage
+	\begin{figure}[H]
+	  \centering
+	  \begin{subfigure}[b]{0.3\linewidth}
+	    \includegraphics[width=\linewidth, height=5 cm]{init.png}
+	     \caption{Estado inicial}
+	  \end{subfigure}
+	  \begin{subfigure}[b]{0.3\linewidth}
+	    \includegraphics[width=\linewidth, height=7 cm]{goal.png}
+	    \caption{Estado final}
+	  \end{subfigure}
+		\begin{subfigure}[b]{0.8\linewidth}
+			\includegraphics[width=\linewidth]{pn.png}
+			\caption{Rede de Petri do problema}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.5\linewidth}
+			\includegraphics[width=\linewidth]{plan.png}
+			\caption{Plano obtido}
+		\end{subfigure}
+		\caption{Modelagem no itSIMPLE 4.0}
+
+	\end{figure}
+
+\section{Simulação do sistema de planejamento}
+
+	Após a modelagem e validação de um sistema inteligente capaz de resolver o problema do mundo dos blocos, passou-se ao estudo de ferramentas para criar simulações dos planos obtidos. Decidiu-se pelo uso do ROS e Gazebo.
+
+\subsection{Sistema em ROS}
+
+	ROS (Robot Operating System) é um framework que conta com um conjunto de bibliotecas open source em Python ou C++ para construir e controlar robôs. Sistemas em ROS contam com a "abstração de hardware", que significa que um sistema ROS feito para um robô funciona em qualquer outro também construído em ROS. O funcionamento básico desses sistemas se dá pelo contato entre os diversos "nós" que o compõe.\cite{ros}
+	\paragraph{}
+
+	Em parceria com o grupo RoboFEI da Faculdade de Engenharia Industrial, obteve-se acesso a um robô manipulador. Para programar o robô a fim de que ele fosse capaz de executar um plano para o mundo dos blocos, foi feito, em Python, um sistema no ROS chamado de judith\_dlab.
+	\paragraph{}
+
+	O panorama do Judith-Dlab é mostrado na figura 3, e conta com 3 nós:
+
+	\begin{itemize}
+		\item Interpreter: Nó que recebe o plano e o estado inicial diretamente do planejador em Prolog (visto na seção 2.2) e transforma essas informações em comandos entendíveis pelo robô.
+		\item Environment : Nó que administra todas as ações tomadas e atualiza o estado de acordo.
+		\item Communicator : Nó que recebe as informações processadas e envia ao robô as coordenadas para onde o manipulador deve se mover.
+	\end{itemize}
+
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=8cm, height = 8cm, keepaspectratio]{judith_dlab.png}
+		\caption{Panorama do sistema judith\_dlab}
+	\end{figure}
+
+	\paragraph{}
+
+	Foram realizadas simulações no computador do funcionamento do judith\_dlab, uma delas é mostrada na figura 4 (por questão de espaço, é mostrado um caso mais simples que o da figura 1)
+
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=10cm,height=10cm, keepaspectratio]{ros.png}
+		\caption{Funcionamento do sistema}
+	\end{figure}
+
+	\paragraph{}
+
+	O "matricial state", mostrado na figura é um estado intermediário utilizado internamente no Interpreter e usado para verificar possíveis erros. As três linhas de [INFO] são as coordenadas (x,y,z) que são enviadas ao robô a cada interação pelo Communicator.
+
+	\paragraph{}
+
+	Por problemas de hardware do manipulador da FEI, não foi possível implementar o sistema ROS neste robô até o presente momento.
+
+\section{Continuidade do projeto}
+\paragraph{}
+
+	A fim de evitar problemas com hardware externo, como o ocorrido com o manipulador da FEI, decidiu-se adotar um ambiente virtual de simulação e construção de robôs integrado com o ROS, o Gazebo.
+	\paragraph{}
+
+	Algumas vantagens do Gazebo são suas engines de física de alta performance, gráficos 3D, a possibildade de rodar simulações remotamente, e as diversas bibliotecas de integração com o ROS.
+	\paragraph{}
+
+	No presente momento, se faz o estudo sobre tais bibliotecas, entre elas a "tf2", que permite controlar conjuntamente diversos sistemas de coordenadas, "URDF", que é um formato universal de descrição e construção de robôs, e a "ROSPlan", que permite integrar planejadores mais sofisticados com o ROS e o Gazebo.
+	\paragraph{}
+
+	O objetivo imediato é construir no Gazebo um robô manipulador, um ambiente virtual do "mundo dos blocos", e realizar a simulação desejada dentro do Gazebo. Após isso, o objetivo é construir no Gazebo um ambiente de simulação multipropósito, capaz de se integrar com a ferramenta itSIMPLE e simular ambientes e problemas mais complexos.
+
+\section{Conclusão}
+
+	\paragraph{}
+	O plano obtido no planejador desenvolvido em Prolog, apesar de apresentar um passo a mais que aquele obtido no Metric-FF, alcança corretamente o objetivo. Dessa forma, sabe-se que o planejador desenvolvido está correto e validado por ferramentas mais avançadas.
+	\paragraph{}
+	O sistema de simulação em ROS também alcança os objetivos corretamente em um ambiente de simulação, apesar de ainda não ter sido validado em um robô real ou virtual.
+	\paragraph{}
+	A realização deste trabalho trouxe diversos conhecimentos importantes que servirão de base em futuros projetos, entre eles o aprendizado de conceitos de inteligência artificial, de controle e construção de robôs utilizando ROS, e simulação usando Gazebo. Todos esses conhecimentos são universais e podem ser aplicados em diversas áreas da robótica e da inteligência artificial.
+
+
+
+
+\newpage
+
+\nocite{}
+\bibliography{relatorio}
+\bibliographystyle{ieeetr}
+
+\end{document}

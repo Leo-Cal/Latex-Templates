@@ -1,0 +1,64 @@
+
+Figure :
+
+\begin{figure}[h!]
+\centering
+  \includegraphics[scale = 0.4]{traceroute.png}
+  \caption{Caminho percorrido pelo pacote}
+  \label{fig:figura 1}
+\end{figure}
+---------------------------------------------------------------------
+
+Table :
+
+\begin{table}[h!]
+ \begin{center}
+	 \caption{Medidas estatísticas de cada parâmetro}
+	 \label{tab:table1}
+	 \begin{tabular}{c|c|c}
+		 \textbf{Parâmetro} & \textbf{Média} & \textbf{Desvio Padrão}\\
+
+		 \hline
+		 SampleRTT & 250,02 & 27,95 \\
+		 EstimatedRTT & 249,91 & 12,24 \\
+		 DevRTT & 11,95 & 13,10 \\
+		 TimeoutInterval & 297,72 & 64,37 \\
+
+	 \end{tabular}
+ \end{center}
+\end{table}
+
+------------------------------------------------------------
+Listing :
+
+\begin{minted}[bgcolor = codegray]{*LANGUAGE*}
+*CODE*
+\end{minted}
+
+\captionof{lstlisting}{*CAPTION*}
+
+-----------------------------------------------
+
+Figure with subfigures
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.3\linewidth}
+    \includegraphics[width=\linewidth, height=5 cm]{init.png}
+     \caption{Estado inicial}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.3\linewidth}
+    \includegraphics[width=\linewidth, height=7 cm]{goal.png}
+    \caption{Estado final}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.8\linewidth}
+    \includegraphics[width=\linewidth]{pn.png}
+    \caption{Rede de Petri do problema}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\linewidth}
+    \includegraphics[width=\linewidth]{plan.png}
+    \caption{Plano obtido}
+  \end{subfigure}
+  \caption{Modelagem no itSIMPLE 4.0}
+
+\end{figure}

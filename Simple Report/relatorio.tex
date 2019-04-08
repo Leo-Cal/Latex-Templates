@@ -1,0 +1,48 @@
+\documentclass[12pt,titlepage]{article}
+
+\usepackage[brazil]{babel}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc} %use UTF8 encoding
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{minted}
+\usepackage{multicol}
+\usepackage{subcaption}
+\usepackage{titlepic}
+\usepackage{fancyhdr} %%Fancy headings
+
+\colorlet{codegray}{gray!20}
+
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+
+\begin{document}
+
+\input{titlepage}
+
+\pagenumbering{gobble}
+\newpage
+\doublespacing
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+\section{Item A}
+
+\section{Item B}
+
+\section{Item C}
+
+
+
+
+
+
+%\nocite{}
+%\bibliography{relatorio}
+%\bibliographystyle{ieeetr}
+
+\end{document}
